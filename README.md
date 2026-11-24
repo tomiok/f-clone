@@ -10,7 +10,7 @@ Go 1.26 or newer.
 
 ```bash
 go test ./...
-go run ./cmd/firefly
+go run ./cmd/app
 ```
 
 Open http://localhost:8080. The notebook already contains one finished meeting, "Q3 pricing decision". Record starts another. On the live page the notetaker adds lines on its own, and you can add one yourself. Stop opens the notepad.
