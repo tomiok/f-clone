@@ -1,9 +1,9 @@
-// Package capture turns a live meeting into transcript lines.
+// Package conversation turns a live meeting into transcript lines.
 //
 // Recorder is the seam in front of recording. Conversation is where the
 // lines come from. The shipped conversation is MockConversation. A real
 // capture reimplements Conversation, and this walker stays the same.
-package capture
+package conversation
 
 import "fireflies-clone/internal/meeting"
 

@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"fireflies-clone/internal/capture"
+	"fireflies-clone/internal/conversation"
 	"fireflies-clone/internal/meeting"
 	"fireflies-clone/internal/summary"
 )
@@ -280,7 +280,7 @@ func newID() (string, error) {
 }
 
 func sample() meeting.Meeting {
-	lines := capture.MockConversation{}.Lines(nil)
+	lines := conversation.MockConversation{}.Lines(nil)
 	sentences := make([]meeting.Sentence, len(lines))
 	var speakers []string
 	seen := map[string]struct{}{}

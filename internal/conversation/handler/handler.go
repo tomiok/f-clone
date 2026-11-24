@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"fireflies-clone/internal/capture"
+	"fireflies-clone/internal/conversation"
 	"fireflies-clone/internal/meeting"
 	"fireflies-clone/internal/store"
 	"fireflies-clone/web"
@@ -57,9 +57,9 @@ func (h Handler) AddLine(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var line capture.Line
+	var line conversation.Line
 	if r.FormValue("source") == "script" {
-		rec := capture.NewRecorder(capture.MockConversation{}, m.Participants, m.Sentences)
+		rec := conversation.NewRecorder(conversation.MockConversation{}, m.Participants, m.Sentences)
 		next, more := rec.Next()
 		if !more {
 			http.Redirect(w, r, "/meetings/"+m.ID+"/live", http.StatusSeeOther)
@@ -106,7 +106,7 @@ func (h Handler) AddLine(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) liveView(m meeting.Meeting, message string) web.View {
-	_, more := capture.NewRecorder(capture.MockConversation{}, m.Participants, m.Sentences).Next()
+	_, more := conversation.NewRecorder(conversation.MockConversation{}, m.Participants, m.Sentences).Next()
 	return web.View{
 		Title:      m.Title,
 		Meeting:    m,

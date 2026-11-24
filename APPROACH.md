@@ -2,7 +2,7 @@
 
 f - clone is a Go web app with three screens: the meeting list, a live meeting, and a notepad. Summary sits on the left of the notepad, the transcript on the right. That is the Fireflies loop (capture, then notes), not the rest of the product (calendar bots, email, Slack, voice agents).
 
-The brief allows a placeholder for recording, so capture is an interface, `capture.Recorder`, with one method: `Next() (Line, bool)`. The version in this repo walks a short multi-speaker script. Typed lines go through the same append path. The handlers do not know which one produced a sentence. A microphone or a bot would be a second implementation, not a new notepad.
+The brief allows a placeholder for recording, so capture is an interface, `conversation.Recorder`, with one method: `Next() (Line, bool)`. The version in this repo walks a short multi-speaker script. Typed lines go through the same append path. The handlers do not know which one produced a sentence. A microphone or a bot would be a second implementation, not a new notepad.
 
 Stopping the meeting runs `summary.Build` once. It is a pure function: score sentences, quote the strongest ones as the overview and the notes, pull keywords, and keep commitment lines as action items with an owner when the line has one. I did not call an LLM. The result is testable, it needs no API key, and the same function signature is where a model would plug in later. Checking an action item only flips `Done`. A second stop does not rebuild the list, so those checkmarks stay.
 

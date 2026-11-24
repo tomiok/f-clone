@@ -20,7 +20,7 @@ Open http://localhost:8080. The notebook already contains one finished meeting, 
 ## Assumptions
 
 - This is the website only. There is no desktop app, browser extension, login, or calendar connection.
-- Recording does not join a call and does not use a microphone. `capture.Recorder` walks a fixed conversation, and typed lines use the same path. A real recorder would be another type behind that interface.
+- Recording does not join a call and does not use a microphone. `conversation.Recorder` walks a fixed conversation, and typed lines use the same path. A real recorder would be another type behind that interface.
 - The transcript is those lines, with the speaker and the time since the meeting started. Nothing on the server turns audio into text.
 - The overview, notes, keywords, and action items are extracted from the transcript in process. They quote the meeting. They do not call an LLM.
 - One process, one JSON file. The store mutex is enough for that. More than one process needs a real database.

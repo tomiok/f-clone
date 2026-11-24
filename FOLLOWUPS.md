@@ -24,7 +24,7 @@ The meeting still completes. Overview says nothing was captured. There are no ma
 
 **The brief says a placeholder is fine. What is the placeholder?**
 
-`capture.Recorder` has `Next() (Line, bool)`. The implementation we ship walks a fixed multi-speaker script. The live page turns each line into a sentence. Typed lines use the same append path. Nothing joins a real call.
+`conversation.Recorder` has `Next() (Line, bool)`. The implementation we ship walks a fixed multi-speaker script. The live page turns each line into a sentence. Typed lines use the same append path. Nothing joins a real call.
 
 **How would a real recorder replace it?**
 

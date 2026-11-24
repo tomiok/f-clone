@@ -4,12 +4,12 @@ import (
 	"strings"
 	"testing"
 
-	"fireflies-clone/internal/capture"
+	"fireflies-clone/internal/conversation"
 	"fireflies-clone/internal/meeting"
 )
 
 func fixture() []meeting.Sentence {
-	lines := capture.MockConversation{}.Lines(nil)
+	lines := conversation.MockConversation{}.Lines(nil)
 	out := make([]meeting.Sentence, len(lines))
 	for i, ln := range lines {
 		out[i] = meeting.Sentence{Speaker: ln.Speaker, Text: ln.Text, StartSec: float64(i), EndSec: float64(i + 1)}

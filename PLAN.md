@@ -60,7 +60,7 @@ cmd/app/deps.go              wire the store and the handler
 cmd/app/server.go            HTTP server
 cmd/app/main/main.go         route table
 internal/meeting/meeting.go  types and status
-internal/capture/capture.go  Recorder interface + scripted recorder
+internal/conversation/conversation.go  Recorder interface + scripted recorder
 internal/summary/summary.go  overview, notes, keywords, actions
 internal/summary/summary_test.go
 internal/store/store.go      JSON file, mutex, seed
@@ -114,7 +114,7 @@ type Meeting struct {
 }
 ```
 
-**capture.Recorder.** One method the live page and the tests can call.
+**conversation.Recorder.** One method the live page and the tests can call.
 
 ```go
 type Line struct {
