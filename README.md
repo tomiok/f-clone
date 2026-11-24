@@ -9,9 +9,12 @@ It is one Go binary. Pages are `html/template`. There is no database. The router
 Go 1.26 or newer.
 
 ```bash
-go test ./...
-go run ./cmd/app/main
+make test
+make run
+make lint
 ```
+
+`make install-tools` installs golangci-lint. `go test ./...` and `go run ./cmd/app/main` do the same as `make test` and `make run`.
 
 Open http://localhost:8080. The notebook already contains one finished meeting, "Q3 pricing decision". Record starts another. On the live page the notetaker adds lines on its own, and you can add one yourself. Stop opens the notepad.
 
