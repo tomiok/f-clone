@@ -24,7 +24,7 @@
       setTimeout(pump, 700);
       return;
     }
-    script.requestSubmit();
+    script.submit();
   };
   setTimeout(pump, 1600);
 })();

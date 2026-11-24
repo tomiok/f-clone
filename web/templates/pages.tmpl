@@ -93,11 +93,10 @@
 </div>
 <ul class="people">{{range .Meeting.Participants}}<li>{{.}}</li>{{end}}</ul>
 {{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+<form id="script-form" method="post" action="/meetings/{{.Meeting.ID}}/lines" hidden>
+  <input type="hidden" name="source" value="script">
+</form>
 <div class="live-actions">
-  <form id="script-form" method="post" action="/meetings/{{.Meeting.ID}}/lines">
-    <input type="hidden" name="source" value="script">
-    <button type="submit" class="ghost">Capture next line</button>
-  </form>
   <form method="post" action="/meetings/{{.Meeting.ID}}/stop">
     <button class="stop" type="submit">Stop</button>
   </form>
