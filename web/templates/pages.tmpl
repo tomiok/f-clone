@@ -97,7 +97,7 @@
   <input type="hidden" name="source" value="script">
 </form>
 <div class="live-actions">
-  <form method="post" action="/meetings/{{.Meeting.ID}}/stop">
+  <form id="stop-form" method="post" action="/meetings/{{.Meeting.ID}}/stop">
     <button class="stop" type="submit">Stop</button>
   </form>
 </div>
