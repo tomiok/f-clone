@@ -168,35 +168,35 @@ Ship one completed meeting in the seed, about a pricing decision, so the notepad
 
 ### 1. Module and types
 
-- [ ] `go mod init`, packages above, meeting types
-- [ ] Summary tests first, against a fixed fixture (decision, Maya's action, a first-person action, a question, filler)
-- [ ] Store tests in `t.TempDir()`: create, append, complete, toggle, delete, missing id
+- [x] `go mod init`, packages above, meeting types
+- [x] Summary tests first, against a fixed fixture (decision, Maya's action, a first-person action, a question, filler)
+- [x] Store tests in `t.TempDir()`: create, append, complete, toggle, delete, missing id
 
 Acceptance: `go test ./...` passes with no UI yet.
 
 ### 2. HTTP and notepad
 
-- [ ] Seed loads
-- [ ] List page and notepad render the seed
-- [ ] Toggle action and delete work
-- [ ] Unknown id returns a normal 404 page
+- [x] Seed loads
+- [x] List page and notepad render the seed
+- [x] Toggle action and delete work
+- [x] Unknown id returns a normal 404 page
 
 Acceptance: open the seed meeting and check off an action.
 
 ### 3. Record path
 
-- [ ] Create a meeting, land on the live screen, timer running
-- [ ] Scripted lines append with speaker and offset
-- [ ] Optional typed line uses the same path
-- [ ] Stop runs summary once and opens the notepad with overview, notes, keywords, actions
+- [x] Create a meeting, land on the live screen, timer running
+- [x] Scripted lines append with speaker and offset
+- [x] Optional typed line uses the same path
+- [x] Stop runs summary once and opens the notepad with overview, notes, keywords, actions
 
 Acceptance: record, stop, read a notepad that came from that session.
 
 ### 4. Write-up
 
-- [ ] README: Go version, `go run`, `go test`, where data lives, libraries (stdlib only if that stays true)
-- [ ] APPROACH.md: the loop, why the Recorder interface, why extractive summary, what was left out, time spent
-- [ ] If a follow-up answer in FOLLOWUPS.md no longer matches the code, fix the answer
+- [x] README: Go version, `go run`, `go test`, where data lives, libraries (stdlib only if that stays true)
+- [x] APPROACH.md: the loop, why the Recorder interface, why extractive summary, what was left out, time spent
+- [x] If a follow-up answer in FOLLOWUPS.md no longer matches the code, fix the answer
 
 Acceptance: someone else can run it from the README and open both the seed meeting and a meeting they just recorded.
 

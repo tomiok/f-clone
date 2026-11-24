@@ -14,7 +14,7 @@ Fireflies is a loop: live meeting, a processing status, then a notepad with summ
 
 **What happens if stop is clicked twice, or the process dies in between?**
 
-Stop runs summary only from Active. A second post sees Completed and does not rebuild actions (which would wipe the checkmarks). A crash mid-stop can leave Processing. On read, a Processing meeting with sentences and no overview can be finished once. Say that plainly if we implement the recovery. If we do not, the answer is: a crash can leave Processing, and the fix is to make stop idempotent and finish stragglers on read.
+Stop moves Active to Processing, runs `summary.Build` once, then stores Completed. A second stop sees Completed and returns the same meeting, so checked action items stay checked. If the process dies after the Processing write and before Completed, opening the notepad (or stopping again) finishes that meeting. The JSON write is a temp file plus rename, so a crash during the write keeps the previous file.
 
 **What if nobody spoke?**
 
