@@ -1,6 +1,6 @@
 # What I built, and why
 
-Firefly is a Go web app with three screens: the meeting list, a live meeting, and a notepad. Summary sits on the left of the notepad, the transcript on the right. That is the Fireflies loop (capture, then notes), not the rest of the product (calendar bots, email, Slack, voice agents).
+f - clone is a Go web app with three screens: the meeting list, a live meeting, and a notepad. Summary sits on the left of the notepad, the transcript on the right. That is the Fireflies loop (capture, then notes), not the rest of the product (calendar bots, email, Slack, voice agents).
 
 The brief allows a placeholder for recording, so capture is an interface, `capture.Recorder`, with one method: `Next() (Line, bool)`. The version in this repo walks a short multi-speaker script. Typed lines go through the same append path. The handlers do not know which one produced a sentence. A microphone or a bot would be a second implementation, not a new notepad.
 

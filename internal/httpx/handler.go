@@ -1,4 +1,4 @@
-// Package httpx serves the Firefly notebook.
+// Package httpx serves the f - clone notebook.
 package httpx
 
 import (
@@ -307,7 +307,7 @@ func (h *handler) render(w http.ResponseWriter, status int, name string, v view)
 		v.Meetings = h.store.List()
 	}
 	if v.Title == "" {
-		v.Title = "Firefly"
+		v.Title = "f - clone"
 	}
 	var buf bytes.Buffer
 	if err := h.tmpl.ExecuteTemplate(&buf, name, v); err != nil {

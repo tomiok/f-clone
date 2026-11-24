@@ -1,4 +1,4 @@
-# Firefly
+# f - clone
 
 A small web app in the shape of [Fireflies](https://fireflies.ai/): record a meeting, keep a transcript, and open a notepad with an overview, notes, and action items.
 
