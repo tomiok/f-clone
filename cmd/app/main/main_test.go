@@ -12,8 +12,10 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"fireflies-clone/cmd/app"
-	"fireflies-clone/internal/httpx"
+	conversationhandler "fireflies-clone/internal/conversation/handler"
+	meetinghandler "fireflies-clone/internal/meeting/handler"
 	"fireflies-clone/internal/store"
+	"fireflies-clone/web"
 )
 
 func TestNotebookAndRecordFlow(t *testing.T) {
@@ -118,7 +120,7 @@ func TestResumeContinuesFromStoppedTime(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h := handlerServer(httpx.New(st))
+	h := handlerServer(st)
 	created := post(t, h, "/meetings", url.Values{"title": {"Hold"}})
 	id := strings.TrimSuffix(strings.TrimPrefix(created.Header().Get("Location"), "/meetings/"), "/live")
 	post(t, h, "/meetings/"+id+"/lines", url.Values{"source": {"script"}})
@@ -156,12 +158,16 @@ func newTestServer(t *testing.T) http.Handler {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return handlerServer(httpx.New(st))
+	return handlerServer(st)
 }
 
-func handlerServer(h httpx.Handler) http.Handler {
+func handlerServer(st *store.Store) http.Handler {
+	pages := web.NewPages(st.List)
 	r := chi.NewRouter()
-	routes(r, app.Deps{Handler: h})
+	routes(r, app.Deps{
+		Meetings:     meetinghandler.New(st, pages),
+		Conversation: conversationhandler.New(st, pages),
+	})
 	return r
 }
 

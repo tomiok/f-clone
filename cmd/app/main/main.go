@@ -37,20 +37,20 @@ func run() error {
 }
 
 func routes(r *chi.Mux, d app.Deps) {
-	h := d.Handler
 	static, err := fs.Sub(web.FS, "static")
 	if err != nil {
 		panic(err)
 	}
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.FS(static))))
 
-	r.Get("/", h.List)
-	r.Get("/new", h.NewForm)
-	r.Post("/meetings", h.Create)
-	r.Get("/meetings/{id}/live", h.Live)
-	r.Post("/meetings/{id}/lines", h.AddLine)
-	r.Post("/meetings/{id}/stop", h.Stop)
-	r.Get("/meetings/{id}", h.Notepad)
-	r.Post("/meetings/{id}/actions/{actionID}", h.Toggle)
-	r.Post("/meetings/{id}/delete", h.Delete)
+	r.Get("/", d.Meetings.List)
+	r.Get("/new", d.Meetings.NewForm)
+	r.Post("/meetings", d.Meetings.Create)
+	r.Get("/meetings/{id}", d.Meetings.Notepad)
+	r.Post("/meetings/{id}/stop", d.Meetings.Stop)
+	r.Post("/meetings/{id}/actions/{actionID}", d.Meetings.Toggle)
+	r.Post("/meetings/{id}/delete", d.Meetings.Delete)
+
+	r.Get("/meetings/{id}/live", d.Conversation.Live)
+	r.Post("/meetings/{id}/lines", d.Conversation.AddLine)
 }

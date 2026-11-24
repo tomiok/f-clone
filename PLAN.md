@@ -65,8 +65,9 @@ internal/summary/summary.go  overview, notes, keywords, actions
 internal/summary/summary_test.go
 internal/store/store.go      JSON file, mutex, seed
 internal/store/store_test.go
-internal/httpx/handler.go    routes
-internal/httpx/pages.go      render
+internal/meeting/handler/    meeting list, notepad, stop, delete
+internal/conversation/handler/ live page and transcript lines
+web/                         templates and page render
 web/templates/*.tmpl
 web/static/app.css
 data/                        gitignored runtime file
@@ -145,7 +146,7 @@ func Build(sentences []Sentence) Result
 
 **store.** `sync.Mutex` around a JSON file under `data/`. Create, list, get, set sentences, set status, save summary, toggle action, delete. Seed only when the file is missing. IDs from `crypto/rand`, hex, not user input, so paths cannot escape.
 
-**httpx.** `http.ServeMux` patterns:
+**Routes,** registered in `cmd/app/main`, one handler package per business unit:
 
 | Method and path | What it does |
 | --- | --- |

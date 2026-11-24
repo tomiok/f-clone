@@ -5,17 +5,21 @@ import (
 	"os"
 	"path/filepath"
 
-	"fireflies-clone/internal/httpx"
+	conversationhandler "fireflies-clone/internal/conversation/handler"
+	meetinghandler "fireflies-clone/internal/meeting/handler"
 	"fireflies-clone/internal/store"
+	"fireflies-clone/web"
 )
 
 // Deps is everything main needs to serve the notebook.
 type Deps struct {
-	Port    string
-	Handler httpx.Handler
+	Port         string
+	Meetings     meetinghandler.Handler
+	Conversation conversationhandler.Handler
 }
 
-// NewDeps opens the meeting store and builds the handler. Routes stay in main.
+// NewDeps opens the meeting store and builds one handler per business unit.
+// Routes stay in main.
 func NewDeps() (Deps, error) {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -29,8 +33,10 @@ func NewDeps() (Deps, error) {
 	if err != nil {
 		return Deps{}, fmt.Errorf("open store: %w", err)
 	}
+	pages := web.NewPages(st.List)
 	return Deps{
-		Port:    port,
-		Handler: httpx.New(st),
+		Port:         port,
+		Meetings:     meetinghandler.New(st, pages),
+		Conversation: conversationhandler.New(st, pages),
 	}, nil
 }
