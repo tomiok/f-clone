@@ -102,15 +102,6 @@
   </form>
 </div>
 <ol class="transcript" id="transcript">{{template "lines" .Meeting}}</ol>
-<form class="composer" method="post" action="/meetings/{{.Meeting.ID}}/lines">
-  <label>Speaker
-    <input type="text" name="speaker" value="{{.Speaker}}">
-  </label>
-  <label>Line
-    <input type="text" name="text" maxlength="2000">
-  </label>
-  <button type="submit">Add line</button>
-</form>
 <script src="/static/live.js" defer></script>
 {{template "shell-end" .}}
 {{end}}

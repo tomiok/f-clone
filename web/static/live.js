@@ -41,12 +41,6 @@
 
   var pump = function () {
     if (stopping) return;
-    var active = document.activeElement;
-    var typing = active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA");
-    if (typing) {
-      setTimeout(pump, 700);
-      return;
-    }
     var body = new URLSearchParams();
     body.set("source", "script");
     fetch(script.action, {
