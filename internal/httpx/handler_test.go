@@ -23,6 +23,9 @@ func TestNotebookAndRecordFlow(t *testing.T) {
 	if home.Code != http.StatusOK || !strings.Contains(home.Body.String(), "Q3 pricing decision") {
 		t.Fatalf("home = %d %s", home.Code, home.Body.String())
 	}
+	if !strings.Contains(home.Body.String(), "Connect Google Calendar") || !strings.Contains(home.Body.String(), "Connect Outlook Calendar") {
+		t.Fatal("calendar buttons missing")
+	}
 
 	created := post(t, h, "/meetings", url.Values{
 		"title":        {"Pricing sync"},
@@ -38,7 +41,7 @@ func TestNotebookAndRecordFlow(t *testing.T) {
 	}
 
 	live := get(t, h, loc)
-	if live.Code != http.StatusOK || !strings.Contains(live.Body.String(), "Pricing sync") {
+	if live.Code != http.StatusOK || !strings.Contains(live.Body.String(), "Pricing sync") || !strings.Contains(live.Body.String(), "id=\"resume\"") {
 		t.Fatalf("live = %d %s", live.Code, live.Body.String())
 	}
 
@@ -111,6 +114,32 @@ func TestScriptLineAndDelete(t *testing.T) {
 	}
 	if got := get(t, h, "/meetings/"+id); got.Code != http.StatusNotFound {
 		t.Fatalf("after delete = %d", got.Code)
+	}
+}
+
+func TestResumeContinuesFromStoppedTime(t *testing.T) {
+	st, err := store.Open(filepath.Join(t.TempDir(), "meetings.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := New(st)
+	created := post(t, h, "/meetings", url.Values{"title": {"Hold"}})
+	id := strings.TrimSuffix(strings.TrimPrefix(created.Header().Get("Location"), "/meetings/"), "/live")
+	post(t, h, "/meetings/"+id+"/lines", url.Values{"source": {"script"}})
+	m, ok := st.Get(id)
+	if !ok || len(m.Sentences) != 1 {
+		t.Fatal("expected one line")
+	}
+	held := post(t, h, "/meetings/"+id+"/lines", url.Values{"source": {"script"}, "held": {"1"}})
+	if held.Code != http.StatusSeeOther {
+		t.Fatalf("held = %d", held.Code)
+	}
+	m, ok = st.Get(id)
+	if !ok || len(m.Sentences) != 2 {
+		t.Fatal("expected two lines")
+	}
+	if m.Sentences[1].StartSec != m.Sentences[0].EndSec {
+		t.Fatalf("resume jumped the clock: %#v", m.Sentences)
 	}
 }
 

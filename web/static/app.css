@@ -197,6 +197,34 @@ button {
 
 button.stop { background: var(--danger); color: white; }
 
+button.resume {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button.stop, button.connect {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-icon, .brand-icon { width: 18px; height: 18px; flex: none; }
+
+.connects { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 22px; }
+
+button.connect {
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+}
+
 button.ghost, a.ghost {
   background: transparent;
   color: var(--muted);

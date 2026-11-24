@@ -15,7 +15,12 @@
   }
 
   var stopForm = document.getElementById("stop-form");
+  var stopBtn = document.getElementById("stop");
+  var resumeBtn = document.getElementById("resume");
+  var state = document.getElementById("live-state");
+  var paused = false;
   var stopping = false;
+  var held = false;
 
   function endMeeting() {
     if (stopping || !stopForm) return;
@@ -24,10 +29,26 @@
     stopForm.submit();
   }
 
-  if (stopForm) {
-    stopForm.addEventListener("submit", function () {
-      stopping = true;
-      if (clock) clearInterval(clock);
+  function pause() {
+    paused = true;
+    if (clock) clearInterval(clock);
+    if (stopBtn) stopBtn.hidden = true;
+    if (resumeBtn) resumeBtn.hidden = false;
+    if (state) state.lastChild.textContent = " Paused";
+  }
+
+  if (stopBtn) {
+    stopBtn.addEventListener("click", pause);
+  }
+  if (resumeBtn) {
+    resumeBtn.addEventListener("click", function () {
+      if (stopping) return;
+      paused = false;
+      held = true;
+      if (resumeBtn) resumeBtn.hidden = true;
+      if (stopBtn) stopBtn.hidden = false;
+      if (state) state.lastChild.textContent = " Live";
+      pump();
     });
   }
 
@@ -39,10 +60,11 @@
   var script = document.getElementById("script-form");
   if (!script) return;
 
-  var pump = function () {
-    if (stopping) return;
+  function pump() {
+    if (stopping || paused) return;
     var body = new URLSearchParams();
     body.set("source", "script");
+    if (held) body.set("held", "1");
     fetch(script.action, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -53,7 +75,7 @@
         return res.text();
       })
       .then(function (html) {
-        if (stopping) return;
+        if (stopping || paused) return;
         var doc = new DOMParser().parseFromString(html, "text/html");
         var next = doc.getElementById("transcript");
         var current = document.getElementById("transcript");
@@ -65,8 +87,8 @@
         setTimeout(pump, 1600);
       })
       .catch(function () {
-        if (!stopping) setTimeout(pump, 1600);
+        if (!stopping && !paused) setTimeout(pump, 1600);
       });
-  };
+  }
   setTimeout(pump, 1600);
 })();

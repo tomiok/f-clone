@@ -157,6 +157,10 @@ func (h *handler) addLine(w http.ResponseWriter, r *http.Request) {
 	if start < 0 {
 		start = 0
 	}
+	// Resume keeps the transcript where stop left it.
+	if r.FormValue("held") == "1" && len(m.Sentences) > 0 {
+		start = m.Sentences[len(m.Sentences)-1].EndSec
+	}
 	id := m.ID
 	var err error
 	m, err = h.store.Append(id, meeting.Sentence{
