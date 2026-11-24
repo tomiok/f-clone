@@ -28,6 +28,12 @@ type Action struct {
 	Done  bool   `json:"done"`
 }
 
+// IsActive reports whether the meeting is still being captured.
+func (m Meeting) IsActive() bool { return m.Status == StatusActive }
+
+// IsProcessing reports whether notes are being built.
+func (m Meeting) IsProcessing() bool { return m.Status == StatusProcessing }
+
 // Meeting is one recorded conversation and the notes produced from it.
 type Meeting struct {
 	ID           string     `json:"id"`

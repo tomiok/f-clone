@@ -1,0 +1,181 @@
+{{define "head"}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}} · Firefly</title>
+<link rel="stylesheet" href="/static/app.css">
+{{if .Refresh}}<meta http-equiv="refresh" content="1;url={{.Refresh}}">{{end}}
+{{end}}
+
+{{define "shell-start"}}
+<!DOCTYPE html>
+<html lang="en"{{if .ScriptDone}} data-script-done="true"{{end}}>
+<head>{{template "head" .}}</head>
+<body>
+<aside class="rail">
+  <a class="brand" href="/">Firefly</a>
+  <p class="brand-sub">Meeting notes</p>
+  <a class="record" href="/new">Record</a>
+  <p class="rail-label">Meetings</p>
+  <nav aria-label="Meetings">
+    {{range .Meetings}}
+    <a class="rail-item{{if eq .ID $.CurrentID}} is-current{{end}}" href="{{if .IsActive}}/meetings/{{.ID}}/live{{else}}/meetings/{{.ID}}{{end}}">
+      <span>{{.Title}}</span>
+      <small>{{if .IsActive}}Live{{else if .IsProcessing}}Transcribing{{else}}{{dur .DurationSec}}{{end}}</small>
+    </a>
+    {{else}}
+    <p class="rail-empty">No meetings yet</p>
+    {{end}}
+  </nav>
+</aside>
+<main>
+{{end}}
+
+{{define "shell-end"}}
+</main>
+</body>
+</html>
+{{end}}
+
+{{define "lines"}}
+{{range .Sentences}}
+<li>
+  <time datetime="PT{{printf "%.0f" .StartSec}}S">{{offset .StartSec}}</time>
+  <strong>{{.Speaker}}</strong>
+  <p>{{.Text}}</p>
+</li>
+{{else}}
+<li class="muted">No lines yet.</li>
+{{end}}
+{{end}}
+
+{{define "list"}}
+{{template "shell-start" .}}
+<p class="eyebrow">Notebook</p>
+<h1>Meetings</h1>
+<div class="cards">
+  {{range .Meetings}}
+  <a class="card" href="{{if .IsActive}}/meetings/{{.ID}}/live{{else}}/meetings/{{.ID}}{{end}}">
+    <h2>{{.Title}}</h2>
+    <p class="overview">{{if .IsActive}}Live now{{else if .IsProcessing}}Transcribing{{else}}{{.Overview}}{{end}}</p>
+    <p class="meta">{{when .CreatedAt}} · {{dur .DurationSec}}{{if .Actions}} · {{len .Actions}} action items{{end}}</p>
+  </a>
+  {{else}}
+  <p>Record a meeting and the notes will land here.</p>
+  {{end}}
+</div>
+{{template "shell-end" .}}
+{{end}}
+
+{{define "new"}}
+{{template "shell-start" .}}
+<p class="eyebrow">Record</p>
+<h1>New meeting</h1>
+<p class="muted">Start the notetaker. It will capture the conversation on this page.</p>
+{{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+<form class="stack" method="post" action="/meetings">
+  <label>Title
+    <input type="text" name="title" maxlength="120" required value="{{.DraftTitle}}">
+  </label>
+  <label>Participants
+    <input type="text" name="participants" value="{{.Participants}}">
+  </label>
+  <button type="submit">Start</button>
+</form>
+{{template "shell-end" .}}
+{{end}}
+
+{{define "live"}}
+{{template "shell-start" .}}
+<p class="eyebrow"><span class="dot"></span> Live</p>
+<div class="top">
+  <h1>{{.Meeting.Title}}</h1>
+  <p class="timer" id="timer" data-start="{{.Meeting.CreatedAt.Format "2006-01-02T15:04:05Z07:00"}}">0:00</p>
+</div>
+<ul class="people">{{range .Meeting.Participants}}<li>{{.}}</li>{{end}}</ul>
+{{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+<div class="live-actions">
+  <form id="script-form" method="post" action="/meetings/{{.Meeting.ID}}/lines">
+    <input type="hidden" name="source" value="script">
+    <button type="submit" class="ghost">Capture next line</button>
+  </form>
+  <form method="post" action="/meetings/{{.Meeting.ID}}/stop">
+    <button class="stop" type="submit">Stop</button>
+  </form>
+</div>
+<ol class="transcript" id="transcript">{{template "lines" .Meeting}}</ol>
+<form class="composer" method="post" action="/meetings/{{.Meeting.ID}}/lines">
+  <label>Speaker
+    <input type="text" name="speaker" value="{{.Speaker}}">
+  </label>
+  <label>Line
+    <input type="text" name="text" maxlength="2000">
+  </label>
+  <button type="submit">Add line</button>
+</form>
+<script src="/static/live.js" defer></script>
+{{template "shell-end" .}}
+{{end}}
+
+{{define "transcribing"}}
+{{template "shell-start" .}}
+<p class="eyebrow">Processing</p>
+<h1>Transcribing</h1>
+<p class="muted">{{.Meeting.Title}} is being turned into notes.</p>
+{{template "shell-end" .}}
+{{end}}
+
+{{define "notepad"}}
+{{template "shell-start" .}}
+<div class="top">
+  <div>
+    <p class="eyebrow">Notepad</p>
+    <h1>{{.Meeting.Title}}</h1>
+    <p class="meta">{{when .Meeting.CreatedAt}} · {{dur .Meeting.DurationSec}}</p>
+  </div>
+  <form method="post" action="/meetings/{{.Meeting.ID}}/delete">
+    <button class="ghost" type="submit">Delete</button>
+  </form>
+</div>
+<ul class="people">{{range .Meeting.Participants}}<li>{{.}}</li>{{end}}</ul>
+<div class="split">
+  <section aria-label="Summary">
+    {{if .Meeting.Keywords}}
+    <h2>Keywords</h2>
+    <ul class="chips">{{range .Meeting.Keywords}}<li>{{.}}</li>{{end}}</ul>
+    {{end}}
+    <h2>Overview</h2>
+    <p>{{.Meeting.Overview}}</p>
+    <h2>Notes</h2>
+    <ul>
+      {{range .Meeting.Notes}}<li>{{.}}</li>{{else}}<li class="muted">No notes.</li>{{end}}
+    </ul>
+    <h2>Action items</h2>
+    {{range .Meeting.Actions}}
+    <form method="post" action="/meetings/{{$.Meeting.ID}}/actions/{{.ID}}">
+      <button class="action{{if .Done}} is-done{{end}}" type="submit" aria-pressed="{{if .Done}}true{{else}}false{{end}}">
+        <span class="box" aria-hidden="true"></span>
+        <span>
+          <span class="action-text">{{.Text}}</span>
+          {{if .Owner}}<span class="owner">{{.Owner}}</span>{{end}}
+        </span>
+      </button>
+    </form>
+    {{else}}
+    <p class="muted">No action items.</p>
+    {{end}}
+  </section>
+  <section aria-label="Transcript">
+    <h2>Transcript</h2>
+    <ol class="transcript">{{template "lines" .Meeting}}</ol>
+  </section>
+</div>
+{{template "shell-end" .}}
+{{end}}
+
+{{define "missing"}}
+{{template "shell-start" .}}
+<p class="eyebrow">Notepad</p>
+<h1>Meeting not found</h1>
+<p class="muted"><a href="/">Back to meetings</a></p>
+{{template "shell-end" .}}
+{{end}}
