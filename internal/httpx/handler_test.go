@@ -143,6 +143,18 @@ func TestResumeContinuesFromStoppedTime(t *testing.T) {
 	}
 }
 
+func TestZoneLabel(t *testing.T) {
+	if got := labelForZone("America/Argentina/Cordoba"); got != "BS AS/Argentina" {
+		t.Fatalf("cordoba = %q", got)
+	}
+	if got := labelForZone("America/Argentina/Buenos_Aires"); got != "BS AS/Argentina" {
+		t.Fatalf("buenos aires = %q", got)
+	}
+	if got := labelForZone("Europe/Madrid"); got != "Madrid/Europe" {
+		t.Fatalf("madrid = %q", got)
+	}
+}
+
 func TestEmptyStop(t *testing.T) {
 	st, err := store.Open(filepath.Join(t.TempDir(), "meetings.json"))
 	if err != nil {

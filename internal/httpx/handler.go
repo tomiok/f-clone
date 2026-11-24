@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"math"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -410,7 +411,43 @@ func formatWhen(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	}
-	return t.Local().Format("Jan 2, 15:04")
+	local := t.Local()
+	stamp := local.Format("Jan 2, 15:04")
+	if label := labelForZone(localZone()); label != "" {
+		return stamp + " " + label
+	}
+	return stamp
+}
+
+func localZone() string {
+	if tz := os.Getenv("TZ"); tz != "" && tz != "Local" {
+		return tz
+	}
+	target, err := os.Readlink("/etc/localtime")
+	if err != nil {
+		return ""
+	}
+	const marker = "zoneinfo/"
+	if i := strings.LastIndex(target, marker); i >= 0 {
+		return target[i+len(marker):]
+	}
+	return ""
+}
+
+func labelForZone(name string) string {
+	if name == "" || name == "Local" {
+		return ""
+	}
+	if name == "America/Buenos_Aires" || strings.HasPrefix(name, "America/Argentina/") {
+		return "BS AS/Argentina"
+	}
+	parts := strings.Split(name, "/")
+	if len(parts) >= 2 {
+		city := strings.ReplaceAll(parts[len(parts)-1], "_", " ")
+		region := strings.ReplaceAll(parts[len(parts)-2], "_", " ")
+		return city + "/" + region
+	}
+	return strings.ReplaceAll(name, "_", " ")
 }
 
 func pad(n int) string {
