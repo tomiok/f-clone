@@ -2,7 +2,7 @@
 
 A small web app in the shape of [Fireflies](https://fireflies.ai/): record a meeting, keep a transcript, and open a notepad with an overview, notes, and action items.
 
-It is one Go binary. Pages are `html/template`. There is no database and no third-party module.
+It is one Go binary. Pages are `html/template`. There is no database. The router is chi.
 
 ## Run
 
@@ -10,7 +10,7 @@ Go 1.26 or newer.
 
 ```bash
 go test ./...
-go run ./cmd/app
+go run ./cmd/app/main
 ```
 
 Open http://localhost:8080. The notebook already contains one finished meeting, "Q3 pricing decision". Record starts another. On the live page the notetaker adds lines on its own, and you can add one yourself. Stop opens the notepad.
@@ -29,4 +29,4 @@ Open http://localhost:8080. The notebook already contains one finished meeting, 
 
 ## Libraries
 
-None beyond the Go standard library: `net/http`, `html/template`, `embed`, and `encoding/json`.
+[chi](https://github.com/go-chi/chi) for the route table in `cmd/app/main`. Everything else is the standard library: `net/http`, `html/template`, `embed`, and `encoding/json`.

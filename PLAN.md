@@ -56,7 +56,9 @@ Copy in the UI uses those words. It does not say "simulated", "fake", or "demo m
 Go 1.26 is on this machine. Module path `fireflies-clone`. Stdlib only, unless a test forces otherwise: `net/http`, `html/template`, `embed`, `encoding/json`, `log/slog`.
 
 ```text
-cmd/app/main.go              wire store, handlers, listen
+cmd/app/deps.go              wire the store and the handler
+cmd/app/server.go            HTTP server
+cmd/app/main/main.go         route table
 internal/meeting/meeting.go  types and status
 internal/capture/capture.go  Recorder interface + scripted recorder
 internal/summary/summary.go  overview, notes, keywords, actions
@@ -73,7 +75,7 @@ APPROACH.md
 FOLLOWUPS.md                 already written, update answers if the design shifts
 ```
 
-No Node, no React, no database server. `go test ./...` and `go run ./cmd/app` are the whole workflow.
+No Node, no React, no database server. `go test ./...` and `go run ./cmd/app/main` are the whole workflow.
 
 ## Packages
 

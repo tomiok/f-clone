@@ -6,7 +6,6 @@ import (
 	"errors"
 	"html/template"
 	"io"
-	"io/fs"
 	"log/slog"
 	"math"
 	"net/http"
@@ -39,44 +38,28 @@ type view struct {
 	Refresh      string
 }
 
-// New returns the application handler.
-func New(st *store.Store) http.Handler {
-	h := &handler{store: st, tmpl: mustTemplates()}
-	static, err := fs.Sub(web.FS, "static")
-	if err != nil {
-		panic(err)
-	}
-	mux := http.NewServeMux()
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(static))))
-	mux.HandleFunc("GET /", h.list)
-	mux.HandleFunc("GET /new", h.newForm)
-	mux.HandleFunc("POST /meetings", h.create)
-	mux.HandleFunc("GET /meetings/{id}/live", h.live)
-	mux.HandleFunc("POST /meetings/{id}/lines", h.addLine)
-	mux.HandleFunc("POST /meetings/{id}/stop", h.stop)
-	mux.HandleFunc("GET /meetings/{id}", h.notepad)
-	mux.HandleFunc("POST /meetings/{id}/actions/{actionID}", h.toggle)
-	mux.HandleFunc("POST /meetings/{id}/delete", h.remove)
-	return mux
+// New builds the notebook handler. Routes are registered in main.
+func New(st *store.Store) Handler {
+	return Handler{store: st, tmpl: mustTemplates()}
 }
 
-type handler struct {
+type Handler struct {
 	store *store.Store
 	tmpl  *template.Template
 }
 
-func (h *handler) list(w http.ResponseWriter, r *http.Request) {
+func (h Handler) List(w http.ResponseWriter, r *http.Request) {
 	h.render(w, http.StatusOK, "list", view{Title: "Meetings"})
 }
 
-func (h *handler) newForm(w http.ResponseWriter, r *http.Request) {
+func (h Handler) NewForm(w http.ResponseWriter, r *http.Request) {
 	h.render(w, http.StatusOK, "new", view{
 		Title:        "New meeting",
 		Participants: "Maya, Jordan, Priya",
 	})
 }
 
-func (h *handler) create(w http.ResponseWriter, r *http.Request) {
+func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	if err := readForm(w, r); err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
@@ -103,7 +86,7 @@ func (h *handler) create(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/meetings/"+m.ID+"/live", http.StatusSeeOther)
 }
 
-func (h *handler) live(w http.ResponseWriter, r *http.Request) {
+func (h Handler) Live(w http.ResponseWriter, r *http.Request) {
 	m, ok := h.meeting(w, r.PathValue("id"))
 	if !ok {
 		return
@@ -115,7 +98,7 @@ func (h *handler) live(w http.ResponseWriter, r *http.Request) {
 	h.render(w, http.StatusOK, "live", h.liveView(m, ""))
 }
 
-func (h *handler) addLine(w http.ResponseWriter, r *http.Request) {
+func (h Handler) AddLine(w http.ResponseWriter, r *http.Request) {
 	if err := readForm(w, r); err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
@@ -181,7 +164,7 @@ func (h *handler) addLine(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/meetings/"+m.ID+"/live", http.StatusSeeOther)
 }
 
-func (h *handler) stop(w http.ResponseWriter, r *http.Request) {
+func (h Handler) Stop(w http.ResponseWriter, r *http.Request) {
 	m, ok := h.finish(w, r.PathValue("id"))
 	if !ok {
 		return
@@ -194,7 +177,7 @@ func (h *handler) stop(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *handler) notepad(w http.ResponseWriter, r *http.Request) {
+func (h Handler) Notepad(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	m, ok := h.meeting(w, id)
 	if !ok {
@@ -217,7 +200,7 @@ func (h *handler) notepad(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *handler) toggle(w http.ResponseWriter, r *http.Request) {
+func (h Handler) Toggle(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if !validID(id) {
 		h.missing(w)
@@ -234,7 +217,7 @@ func (h *handler) toggle(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/meetings/"+id, http.StatusSeeOther)
 }
 
-func (h *handler) remove(w http.ResponseWriter, r *http.Request) {
+func (h Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if !validID(id) {
 		h.missing(w)
@@ -252,7 +235,7 @@ func (h *handler) remove(w http.ResponseWriter, r *http.Request) {
 }
 
 // finish runs the summary at most once. A completed meeting is returned as-is.
-func (h *handler) finish(w http.ResponseWriter, id string) (meeting.Meeting, bool) {
+func (h Handler) finish(w http.ResponseWriter, id string) (meeting.Meeting, bool) {
 	if !validID(id) {
 		h.missing(w)
 		return meeting.Meeting{}, false
@@ -277,7 +260,7 @@ func (h *handler) finish(w http.ResponseWriter, id string) (meeting.Meeting, boo
 	return m, true
 }
 
-func (h *handler) meeting(w http.ResponseWriter, id string) (meeting.Meeting, bool) {
+func (h Handler) meeting(w http.ResponseWriter, id string) (meeting.Meeting, bool) {
 	if !validID(id) {
 		h.missing(w)
 		return meeting.Meeting{}, false
@@ -290,7 +273,7 @@ func (h *handler) meeting(w http.ResponseWriter, id string) (meeting.Meeting, bo
 	return m, true
 }
 
-func (h *handler) liveView(m meeting.Meeting, message string) view {
+func (h Handler) liveView(m meeting.Meeting, message string) view {
 	_, more := capture.NewRecorder(capture.MockConversation{}, m.Participants, m.Sentences).Next()
 	return view{
 		Title:      m.Title,
@@ -302,7 +285,7 @@ func (h *handler) liveView(m meeting.Meeting, message string) view {
 	}
 }
 
-func (h *handler) render(w http.ResponseWriter, status int, name string, v view) {
+func (h Handler) render(w http.ResponseWriter, status int, name string, v view) {
 	if v.Meetings == nil {
 		v.Meetings = h.store.List()
 	}
@@ -320,11 +303,11 @@ func (h *handler) render(w http.ResponseWriter, status int, name string, v view)
 	_, _ = io.Copy(w, &buf)
 }
 
-func (h *handler) missing(w http.ResponseWriter) {
+func (h Handler) missing(w http.ResponseWriter) {
 	h.render(w, http.StatusNotFound, "missing", view{Title: "Not found"})
 }
 
-func (h *handler) fail(w http.ResponseWriter, err error) {
+func (h Handler) fail(w http.ResponseWriter, err error) {
 	slog.Error("request", "err", err)
 	http.Error(w, "something went wrong", http.StatusInternalServerError)
 }
