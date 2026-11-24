@@ -1,15 +1,11 @@
 // Package capture turns a live meeting into transcript lines.
 //
-// Recorder is the seam in front of recording. The shipped implementation
-// walks a fixed conversation. A microphone or a meeting bot would be another
-// type with the same Next method, and the HTTP handlers would not change.
+// Recorder is the seam in front of recording. Conversation is where the
+// lines come from. The shipped conversation is MockConversation. A real
+// capture reimplements Conversation, and this walker stays the same.
 package capture
 
-import (
-	"strings"
-
-	"fireflies-clone/internal/meeting"
-)
+import "fireflies-clone/internal/meeting"
 
 // Line is one turn of speech before it has a timestamp.
 type Line struct {
@@ -23,61 +19,23 @@ type Recorder interface {
 	Next() (Line, bool)
 }
 
-// ProductMeeting is the conversation behind the seeded notepad and the
-// default live meeting.
-func ProductMeeting() []Line {
-	return []Line{
-		{"Maya", "We need to decide the launch price before Friday."},
-		{"Jordan", "The risk is shipping at forty nine if support cannot handle the volume."},
-		{"Priya", "I think we should look at the competitor page again."},
-		{"Maya", "We agreed to ship the annual plan at ninety nine dollars."},
-		{"Maya", "Maya will send the pricing sheet to finance tomorrow."},
-		{"Jordan", "I'll book the customer webinar for next Thursday."},
-		{"Priya", "Do we have a deadline for the help center update?"},
-		{"Jordan", "Let's follow up with support on staffing before we announce."},
-	}
+// Conversation is the dialogue a recorder walks. Participants are the
+// names to use, in first-seen order. A real meeting reimplements this
+// instead of editing the mock.
+type Conversation interface {
+	Lines(participants []string) []Line
 }
 
-// LinesFor rewrites the sample conversation onto the meeting's participants,
-// in first-seen order. Unknown extra speakers stay as written.
-func LinesFor(participants []string) []Line {
-	lines := ProductMeeting()
-	if len(participants) == 0 {
-		return lines
-	}
-	order := []string{"Maya", "Jordan", "Priya"}
-	repl := map[string]string{}
-	for i, name := range order {
-		if i >= len(participants) {
-			break
-		}
-		repl[name] = participants[i]
-	}
-	out := make([]Line, len(lines))
-	for i, ln := range lines {
-		if name, ok := repl[ln.Speaker]; ok && name != ln.Speaker {
-			ln.Text = replaceName(ln.Text, ln.Speaker, name)
-			ln.Speaker = name
-		}
-		out[i] = ln
-	}
-	return out
-}
-
-func replaceName(text, from, to string) string {
-	return strings.ReplaceAll(text, from, to)
-}
-
-// script walks LinesFor from the first line that is not already stored.
+// script walks a conversation from the first line that is not already stored.
 type script struct {
 	lines []Line
 	i     int
 }
 
-// NewRecorder positions a recorder at the next uncaptured script line.
-// Typed lines in the middle do not consume the script.
-func NewRecorder(participants []string, sentences []meeting.Sentence) Recorder {
-	lines := LinesFor(participants)
+// NewRecorder positions a recorder at the next uncaptured line.
+// Lines already stored, including typed ones, do not consume the conversation.
+func NewRecorder(conv Conversation, participants []string, sentences []meeting.Sentence) Recorder {
+	lines := conv.Lines(participants)
 	return &script{lines: lines, i: consumed(lines, sentences)}
 }
 

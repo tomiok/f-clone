@@ -8,8 +8,8 @@ import (
 )
 
 func TestRecorderWalksTheScriptOnce(t *testing.T) {
-	lines := ProductMeeting()
-	rec := NewRecorder(nil, nil)
+	lines := MockConversation{}.Lines(nil)
+	rec := NewRecorder(MockConversation{}, nil, nil)
 	var got []Line
 	for {
 		ln, ok := rec.Next()
@@ -27,8 +27,8 @@ func TestRecorderWalksTheScriptOnce(t *testing.T) {
 }
 
 func TestRecorderSkipsLinesAlreadyStored(t *testing.T) {
-	first := ProductMeeting()[0]
-	rec := NewRecorder(nil, []meeting.Sentence{{
+	first := MockConversation{}.Lines(nil)[0]
+	rec := NewRecorder(MockConversation{}, nil, []meeting.Sentence{{
 		Speaker: first.Speaker,
 		Text:    first.Text,
 	}})
@@ -42,7 +42,7 @@ func TestRecorderSkipsLinesAlreadyStored(t *testing.T) {
 }
 
 func TestLinesForRenamesSpeakers(t *testing.T) {
-	lines := LinesFor([]string{"Alice", "Ben", "Chen"})
+	lines := MockConversation{}.Lines([]string{"Alice", "Ben", "Chen"})
 	if lines[0].Speaker != "Alice" {
 		t.Fatalf("speaker = %q", lines[0].Speaker)
 	}

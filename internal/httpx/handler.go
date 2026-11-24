@@ -135,7 +135,7 @@ func (h *handler) addLine(w http.ResponseWriter, r *http.Request) {
 
 	var line capture.Line
 	if r.FormValue("source") == "script" {
-		rec := capture.NewRecorder(m.Participants, m.Sentences)
+		rec := capture.NewRecorder(capture.MockConversation{}, m.Participants, m.Sentences)
 		next, more := rec.Next()
 		if !more {
 			http.Redirect(w, r, "/meetings/"+m.ID+"/live", http.StatusSeeOther)
@@ -291,7 +291,7 @@ func (h *handler) meeting(w http.ResponseWriter, id string) (meeting.Meeting, bo
 }
 
 func (h *handler) liveView(m meeting.Meeting, message string) view {
-	_, more := capture.NewRecorder(m.Participants, m.Sentences).Next()
+	_, more := capture.NewRecorder(capture.MockConversation{}, m.Participants, m.Sentences).Next()
 	return view{
 		Title:      m.Title,
 		Meeting:    m,

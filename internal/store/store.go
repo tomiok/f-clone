@@ -280,7 +280,7 @@ func newID() (string, error) {
 }
 
 func sample() meeting.Meeting {
-	lines := capture.ProductMeeting()
+	lines := capture.MockConversation{}.Lines(nil)
 	sentences := make([]meeting.Sentence, len(lines))
 	var speakers []string
 	seen := map[string]struct{}{}
