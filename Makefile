@@ -20,6 +20,10 @@ build: ## Build the binary into ./bin
 run: ## Run the app
 	go run $(APP_MAIN)
 
+.PHONY: docker
+docker: ## Build the container image f-clone
+	docker build -t f-clone .
+
 .PHONY: clean
 clean: ## Remove build artifacts
 	rm -rf $(BIN_DIR)
